@@ -11,6 +11,8 @@ from amiibo.amiibo import (Amiibo,
                            Hex)
 from amiibo.filterable import FilterableCollection
 
+from config.config import Config
+
 class AmiiboJSONEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Hex):
@@ -18,6 +20,15 @@ class AmiiboJSONEncoder(JSONEncoder):
         elif isinstance(obj, FilterableCollection):
             return list(obj)
         elif isinstance(obj, Amiibo):
+
+            config = Config()
+            imageUrl = config.info['imageUrl']
+            if imageUrl == None or len(imageUrl) == 0:
+                imageUrl = "https://raw.githubusercontent.com/N3evin/AmiiboAPI/master/images/"
+            
+            if imageUrl[-1] != '/':
+                imageUrl += '/'
+
             returner = {
                 'name': obj.name,
                 'head': str(obj.head)[2:],
@@ -26,7 +37,7 @@ class AmiiboJSONEncoder(JSONEncoder):
                 'gameSeries': obj.game_series.name if obj.game_series else None,
                 'amiiboSeries': obj.amiibo_series.name if obj.amiibo_series else None,
                 'character': obj.character.name if obj.character else None,
-                'image': "https://raw.githubusercontent.com/N3evin/AmiiboAPI/master/images/icon_{}-{}.png".format(str(obj.head)[2:], str(obj.tail)[2:]),
+                'image': imageUrl + "icon_{}-{}.png".format(str(obj.head)[2:], str(obj.tail)[2:]),
                 'release': obj.release
             }
             try:

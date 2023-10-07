@@ -9,7 +9,7 @@ import colors
 
 from rfc3339 import rfc3339
 
-from flask import Flask, jsonify, make_response, render_template, request
+from flask import Flask, jsonify, make_response, render_template, request, abort, Response
 from flask_compress import Compress
 from flask_cors import CORS
 
@@ -22,6 +22,8 @@ from routes.type import typeApp
 from routes.character import characterApp
 from routes.amiibo import amiiboApp
 from routes.amiibofull import amiibofullApp
+
+import os
 
 app = Flask(__name__)
 
@@ -57,6 +59,18 @@ def documentation():
 @app.route('/faq/')
 def faqPage():
     return render_template('faq.html')
+
+
+# Images
+@app.route('/images/<image>')
+def image(image):
+    path = './images/' + image
+    if os.path.exists(path):
+        with open(path, 'rb') as file:
+            result = file.read()
+            return Response(result, mimetype="image/png")
+    else:
+        abort(404)
 
 # Handle 400 as json or else Flask will use html as default.
 @app.errorhandler(400)
